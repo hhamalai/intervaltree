@@ -4,7 +4,7 @@ function ConstructIntervalTree(I) {
     } 
 }
 
-function annotationCompare (a, b) {
+function objectCompare (a, b) {
     if (a.start < b.start) {
         return -1;
     } else if (a.start == b.start) {
@@ -47,8 +47,6 @@ function IntervalTreeNode() {
         }
         this.mLeftSet.sort(sortByKey('start'));
         this.mRightSet.sort(sortByKey('end'));
-        console.log("xmid" + this.xMid);
-        //var node = new IntervalTreeNode(xMid, mLeftSet, mRightSet);
         var nc = new IntervalTreeNode();
         if( nc.construct(lSet) ) {
             this.leftChild = nc;
@@ -61,9 +59,6 @@ function IntervalTreeNode() {
     }
     IntervalTreeNode.prototype.getXMid = function() {
         return this.xMid;
-    }
-    IntervalTreeNode.prototype.setLeftChild = function(c) {
-        leftChild = c;
     }
     IntervalTreeNode.prototype.getLeftChild = function() {
         return this.leftChild;
@@ -101,54 +96,31 @@ function median(intervals) {
     return endpoints[parseInt(endpoints.length / 2)];
 }
 
-function createNode(intervals) {
-    console.log(intervals);
-    if (intervals.length == 0) {
-        return null;
-    }
-    var xMid = median(intervals);
-    var lSet = [], mLeftSet = [], mRightSet = [], rSet = [];
-    intervals.forEach(function(elem) {
-        if (elem.end < xMid) {
-            lSet.push(elem);
-        } else if (elem.start > xMid) {
-            rSet.push(elem);
-        } else {
-            mLeftSet.push(elem);
-            mRightSet.push(elem);
-        } 
-    });
-    mLeftSet.sort(sortByKey('start'));
-    mRightSet.sort(sortByKey('end'));
-    console.log("xmid" + xMid);
-    var node = new IntervalTreeNode(xMid, mLeftSet, mRightSet);
-    node.setLeftChild(createNode(lSet));
-    node.setRightChild(createNode(rSet));
-    return node;
-}
-
-function query(v, q, results) {
+function query_point(v, q, results) {
     if (v == null) {
         return;
     } else if (q == v.getXMid()) {
-        results.concat(v.getLeftSet());
+        for (var i=0; i < v.getLeftSet().length; i++) {
+            var it = v.getLeftSet()[i];
+            results.push(it);
+        }
         return;
     } else if (q < v.getXMid()) {
         for (var i=0; i < v.getLeftSet().length; i++) {
             var it = v.getLeftSet()[i];
-            if (it.start < q) {
+            if (it.start <= q) {
                 results.push(it);
             }
         }
-        query(v.getLeftChild(), q, results);
+        query_point(v.getLeftChild(), q, results);
     } else if (q > v.getXMid()) {
         for (var i=0; i < v.getRightSet().length; i++) {
-            var it = v.getRightSet().at(i);
-            if (it.end > q) {
+            var it = v.getRightSet()[i];
+            if (it.end >= q) {
                 results.push(it);
             }
         }
-        query(v.getRightChild(), q, results);
+        query_point(v.getRightChild(), q, results);
     }
 }
 
@@ -156,17 +128,13 @@ function query(v, q_start, q_end, results) {
     if (v == null) {
         return;
     } else if (q_start == q_end) {
-        query(v, q_start, results);
+        query_point(v, q_start, results);
         return;
     }
     if (q_start > q_end) {
         q_tmp = q_start;
         q_start = q_end;
         q_end = q_tmp;
-    }
-    if (q_start <= v.getXMid() && q_end >= v.getXMid()) {
-        results.concat(v.getLeftSet());
-        return;
     }
     var child;
     var intervalSet;
@@ -232,34 +200,59 @@ function IntervalTree(intervals) {
 
 function debug() {
     var intervals  = [
-      {start: 5, end: 10},
-      {start: 7, end: 10},
-      {start: 7, end: 21},
+      {start: 5, end: 10, data: {color: "red"}},
+      {start: 7, end: 10, data: {color: "blue"}},
+      {start: 7, end: 21, data: {color: "pink"}},
       {start: 14, end: 20},
       {start: 21, end: 25},
       {start: 30, end: 35},
       {start: 36, end: 45},
       {start: 32, end: 42}
     ];
+    console.log("intervals:")
+    for (var i=0; i < intervals.length; i++) {
+        console.log(intervals[i].start + " - " + intervals[i].end);
+    }
     var tree = new IntervalTree(intervals);
-    console.log(tree);
-    console.log(tree.getRoot().getXMid());
-    console.log(tree.getRoot().getLeftSet());
-    console.log(tree.getRoot().getRightSet());
-    console.log("query results:");
-    l = []
-    query(tree.getRoot(), 8, l);
+    console.log("query results for point(7):");
+    var l = new Array();
+    query_point(tree.getRoot(), 7, l);
     console.log(l);
-    if (tree.getRoot().getLeftChild() != null) {
-        console.log("LC" + tree.getRoot().getLeftChild().getXMid());
-        console.log(tree.getRoot().getLeftChild().getLeftSet());
-        console.log(tree.getRoot().getLeftChild().getRightSet());
-    }
-    if (tree.getRoot().getRightChild() != null) {
-        console.log("RC" + tree.getRoot().getRightChild().getXMid());
-        console.log(tree.getRoot().getRightChild().getLeftSet());
-        console.log(tree.getRoot().getRightChild().getRightSet());
-    }
+    console.log("query results for point(10):");
+    var l = new Array();
+    query_point(tree.getRoot(), 10, l);
+    console.log(l);
+    console.log("")
+    console.log("query results for point(42):");
+    l = new Array();
+    query_point(tree.getRoot(), 42, l);
+    console.log(l);
+    console.log("")
+    console.log("query results for range(9, 21):");
+    l = new Array();
+    query(tree.getRoot(), 9, 21, l);
+    console.log(l)
+    console.log("")
+    
+    console.log("query results for range(-1, 100):");
+    l = new Array();
+    query(tree.getRoot(), -1, 100, l);
+    console.log(l)
+    console.log("")
+
+    console.log("query results for range(32, 42):");
+    l = new Array();
+    query(tree.getRoot(), 32, 42, l);
+    console.log(l)
+    console.log("")
+
+
+    console.log("query results for range(-1, 3):");
+    l = new Array();
+    query(tree.getRoot(), -1, 3, l);
+    console.log(l)
+    console.log("")
 
 }
 
+debug();
