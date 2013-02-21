@@ -255,4 +255,3 @@ function debug() {
 
 }
 
-debug();

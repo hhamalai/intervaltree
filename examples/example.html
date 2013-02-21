@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="jquery-1.8.1.min.js" type="text/javascript"></script>
+        <script type="text/javascript" src="intervaltree.js"></script>
+        <script type="text/javascript">
+            var canvas = null;
+            var cctx = null; 
+            var img = new Image();
+            var width = 800;
+            var height = 110;
+            var maxInterval = 280;
+            var selectionHeadX = 0;
+            var intervals  = [
+              {start: 5, end: 10, data: {color: "red"}},
+              {start: 7, end: 10, data: {color: "blue"}},
+              {start: 7, end: 21, data: {color: "pink"}},
+              {start: 14, end: 20},
+              {start: 21, end: 25},
+              {start: 30, end: 35},
+              {start: 36, end: 45},
+              {start: 32, end: 42},
+              {start: 30, end: 200}
+            ];
+            var tree = null;
+            var insertMode = true;
+            $(document).ready(function(){
+                canvas = document.getElementById('interval_canvas');
+                cctx = canvas.getContext('2d');
+                img.src = "ruler.png";
+                window.setInterval(draw, 30);
+                canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
+                canvas.ondblclick = jump;
+                canvas.addEventListener('mousedown', setDragStart);
+                canvas.addEventListener('mousemove', moveHead);
+                canvas.addEventListener('mouseup', addInterval);
+                $('#insert, #select').change(function() {
+                    if (this.id == 'insert') {
+                        insertMode = true;
+                    } else {
+                        insertMode = false;
+                    }
+                });
+                refresh();
+            });
+
+            function refresh() {
+                jQuery.each(intervals, function(idx, elem) {
+                    elem['data'] = {id: idx}
+                });
+
+                $('#intervals').empty();
+                jQuery.each(intervals, function(idx, elem) {
+                    $('#intervals').append('<div id="interval_'+idx+'">'+elem.start+'-'+elem.end+'</div>')
+                });
+                tree = new IntervalTree(intervals);
+            }
+
+            function draw() {
+                cctx.clearRect(0, 0, width, height);
+                cctx.drawImage(img, 0, 110);
+                cctx.lineWidth = 8;
+                cctx.strokeStyle = "rgba(250,155,50,0.9)";
+                cctx.beginPath();
+                for (var i=0; i < intervals.length; i++) {
+                    if (Math.abs(intervals[i].start - intervals[i].end) < 5) {
+                        cctx.moveTo(time2Pixels(intervals[i].start-1), (50+10*i) % 100 + 10);
+                        cctx.lineTo(time2Pixels(intervals[i].end+1), (50+10*i) % 100 + 10);
+
+                    } else {
+                        cctx.moveTo(time2Pixels(intervals[i].start),  (50+10*i) % 100 + 10);
+                        cctx.lineTo(time2Pixels(intervals[i].end),  (50+10*i) % 100 + 10);
+                    }
+                }
+                cctx.stroke();
+                cctx.closePath();
+                cctx.lineWidth = 2;
+                cctx.beginPath();
+                cctx.strokeStyle = "rgba(155,250,05,0.95)";
+                cctx.moveTo(selectionHeadX,0);
+                cctx.lineTo(selectionHeadX,height);
+                cctx.stroke();
+                cctx.closePath();
+
+
+            }
+            function pixels2Time(x) {
+                return x / width * maxInterval;
+            }
+            function time2Pixels(s) {
+                return s / maxInterval * width;
+            }
+            function addInterval(event) {
+                if (insertMode) {
+                    if (!intervalStartX) {
+                        return;
+                    }
+
+                    var x = event.pageX - canvas.offsetLeft;
+                    if (intervalStartX > x) {
+                        var tmp = intervalStartX;
+                        intervalStartX = x;
+                        x = tmp;
+                    }
+                    convertedStartX = pixels2Time(intervalStartX);
+                    x = pixels2Time(x);
+                    intervals.push({start: convertedStartX, end: x, data: {id: intervals.length}});
+                    refresh();
+                    intervalStartX = null;
+                }
+            }
+            function setDragStart(event) {
+                if (insertMode) {
+                    var x = event.pageX - canvas.offsetLeft;
+                    intervalStartX = x;
+                }
+            }
+            function jump(event) {
+                if (insertMode) {
+                    return false;
+                }
+                var x = event.x;
+                x -= canvas.offsetLeft;
+                selectionHeadX = x;
+            }
+            function moveHead(event) {
+                if (insertMode) {
+                    return false;
+                }
+                var x = event.x;
+                x -= canvas.offsetLeft;
+                selectionHeadX = x;
+                var l = new Array();
+                query_point(tree.getRoot(), pixels2Time(x), l);
+                for (var i=0; i < intervals.length; i++) {
+                    $('#interval_'+i).removeClass("highlight");
+                }
+                for (var i=0; i < l.length; i++) {
+                    $('#interval_'+l[i]['data']['id']).addClass("highlight");
+                }
+            }
+        </script>
+        <style>
+            canvas {
+                background-color: #e0e0e0; 
+            }
+            .highlight {
+                background-color: yellow;
+            }
+        </style>
+    </head>
+
+    <body>
+    <div>
+        <canvas width="800" height="140" id="interval_canvas"></canvas>
+        <div>
+        <input type="radio" name="mode" id="insert" checked=""/>Insert mode
+        <input type="radio" name="mode" id="select" />Select mode
+        </div>
+    </div>
+    <div>
+        <h1>Intervals</h1>
+        <div id="intervals"></div>
+    </div>
+    </body>
+</html>
