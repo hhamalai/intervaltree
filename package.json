@@ -8,15 +8,13 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha src/intervaltree.test.js -w"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hhamalai/intervaltree.git"
   },
   "keywords": [
-    "interval",
-    "tree",
     "algorithms",
     "datastructures"
   ],
