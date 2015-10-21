@@ -1,0 +1,31 @@
+{
+  "name": "intervaltree",
+  "version": "1.0.0",
+  "description": "Interval Tree datastructures",
+  "main": "src/intervaltree.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hhamalai/intervaltree.git"
+  },
+  "keywords": [
+    "algorithms",
+    "datastructures"
+  ],
+  "author": "Harri Hämäläinen <hhamalai@iki.fi> (http://hhamalai.net/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hhamalai/intervaltree/issues"
+  },
+  "homepage": "https://github.com/hhamalai/intervaltree#readme",
+  "devDependencies": {
+    "chai": "3.3.0",
+    "mocha": "2.3.3"
+  }
+}
