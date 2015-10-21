@@ -2,7 +2,7 @@
 <html>
     <head>
         <script src="jquery-1.8.1.min.js" type="text/javascript"></script>
-        <script src="../intervaltree.js" type="text/javascript"></script>
+        <script src="../src/intervaltree.js" type="text/javascript"></script>
         <script type="text/javascript">
             var canvas = null;
             var cctx = null; 
@@ -131,8 +131,7 @@
                 var x = event.x;
                 x -= canvas.offsetLeft;
                 selectionHeadX = x;
-                var l = new Array();
-                query_point(tree.getRoot(), pixels2Time(x), l);
+                var l = tree.queryPoint(pixels2Time(x));
                 for (var i=0; i < intervals.length; i++) {
                     $('#interval_'+i).removeClass("highlight");
                 }
