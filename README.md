@@ -3,6 +3,8 @@ intervaltree.js
 
 An interval tree implemented in JS
 
+Demo
+====
 ```
 var tree = new IntervalTree(intervals);
 var intervals = [
@@ -12,10 +14,9 @@ var intervals = [
 ];
 var matchedIntervals1 = tree.queryPoint(10);
 var matchedIntervals2 = tree.query(10, 20);
-
 ```
 
 
-Runnign Mocha tests
+Running Mocha tests
 ===================
 npm test
