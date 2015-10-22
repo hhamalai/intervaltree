@@ -17,6 +17,7 @@ describe("Test Interval Tree", function() {
 		expect(tree.queryPoint(7).length).to.equal(3);
         expect(tree.queryPoint(10).length).to.equal(3);
         expect(tree.queryPoint(6).length).to.equal(1);
+        expect(tree.queryPoint(6)[0].data.color).to.equal("red");
         expect(tree.queryPoint(42).length).to.equal(2);
         expect(tree.queryPoint(4).length).to.equal(0);
 	});
